@@ -8,7 +8,7 @@ if __name__ == "__main__":
     a=2
     b=3
     w=.05
-    engine=Engine(a=a,b=b,w=w)
+    engine=Engine(a=a,b=b,w=w, mode='async')
     engine.suma_task(queue_suma)
     engine.resta_task(queue_resta)
     engine.seno_task(queue_suma,queue_resta)

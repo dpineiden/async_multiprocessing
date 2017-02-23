@@ -13,7 +13,7 @@ if __name__ == "__main__":
     a=2
     b=3
     w=.05
-    engine=Engine(a=a,b=b,w=w)
+    engine=Engine(a=a,b=b,w=w, mode='mprocess')
     with concurrent.futures.ProcessPoolExecutor() as executor:
         def suma_process():
             print(engine)

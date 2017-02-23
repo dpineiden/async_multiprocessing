@@ -13,6 +13,14 @@ def read_queue(queue):
         queue.task_done()
     return result
 
+async def co_read_queue(queue):
+    result=[]
+    if not queue.empty():
+        for m in range(queue.qsize()):
+            result.append(await queue.get())
+        queue.task_done()
+    return result
+
 def suma_fargs(_in, obtained):
     b=_in[0]+.1
     _out=[b,_in[1]]
@@ -28,6 +36,7 @@ class Engine(object):
         self.a=kwargs['a']
         self.b=kwargs['b']
         self.w=kwargs['w']
+        self.mode=kwargs['mode']
 
     #colores::::
     #red: suma
@@ -38,19 +47,29 @@ class Engine(object):
         result=self.a+delta
         bprint(result)
         await asyncio.sleep(2)
-        queue.put(result)
+        if not self.mode=='mprocess':
+            await queue.put(result)
+        else:
+            queue.put(result)
         return result
 
     async def resta(self, delta, queue):
         result=self.b-delta
         rprint(result)
         await asyncio.sleep(2)
-        queue.put(result)
+        if not self.mode=='mprocess':
+            await queue.put(result)
+        else:
+            queue.put(result)
         return result
 
     async def seno(self, queue_suma, queue_resta):
-        r=read_queue(queue_resta)
-        s=read_queue(queue_suma)
+        if not self.mode=='mprocess':
+            r=await co_read_queue(queue_resta)
+            s=await co_read_queue(queue_suma)
+        else:
+            r=read_queue(queue_resta)
+            s=read_queue(queue_suma)
         result=0
         print(r)
         print(s)
@@ -81,8 +100,9 @@ class Engine(object):
                 self.suma,
                 suma_fargs)
         )
-        if not loop.is_running():
+        if not loop.is_running() and self.mode=='mprocess':
             loop.run_forever()
+            pass
 
 
     def resta_task(self, queue):
@@ -104,8 +124,9 @@ class Engine(object):
                 self.resta,
                 resta_fargs)
         )
-        if not loop.is_running():
+        if not loop.is_running() and self.mode=='mprocess':
             loop.run_forever()
+            pass
 
 
 
@@ -129,6 +150,7 @@ class Engine(object):
                 self.seno,
                 simple_fargs)
         )
-        if not loop.is_running():
+        if not loop.is_running() and self.mode=='mprocess':
             loop.run_forever()
+            pass
 
